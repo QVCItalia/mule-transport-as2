@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:as2="http://www.mulesoft.org/schema/mule/as2"
+    xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.3/mule.xsd
+       http://www.mulesoft.org/schema/mule/as2 http://www.mulesoft.org/schema/mule/as2/3.3/mule-as2.xsd">
+
+    <as2:connector senderId="mule" name="as2Connector" partnerId="mend" keystorePath="src/test/resources/keystoreTest.jks" keystorePassword="PASSWORD" >
+        <!-- TODO Add connector specific properties here and then assert that 
+             they have been set in org.mule.transport.as2.As2NamespaceHandlerTestCase -->
+    </as2:connector>
+</mule>
