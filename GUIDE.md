@@ -87,7 +87,7 @@ This connector also accepts all the attributes from HTTP Connector
 ### Inbound Endpoint Attributes
 
 An inbound AS2 endpoint has no different attributes from an HTTP inbound endpoint.
-You can check the available ones from the <a href="http://www.mulesoft.org/documentation-3.2/display/MULE2USER/HTTP+Transport#HTTPTransport-Attributesof<inboundendpoint...>" title="HTTP Transport">HTTP inbound endpoint</a>.
+You can check the available ones from the <a href="http://www.mulesoft.org/documentation-3.2/display/MULE2USER/HTTP+Transport" title="HTTP Transport">HTTP inbound endpoint</a>.
 
 For example:
 
