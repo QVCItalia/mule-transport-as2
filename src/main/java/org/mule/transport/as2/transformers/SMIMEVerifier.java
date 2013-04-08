@@ -32,6 +32,7 @@ import org.mule.api.annotations.Transformer;
 import org.mule.api.transformer.TransformerException;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transport.as2.transformers.MDNBuilder.MdnType;
+import org.mule.util.IOUtils;
 
 @ContainsTransformerMethods
 public class SMIMEVerifier 
@@ -62,12 +63,13 @@ public class SMIMEVerifier
 		try {
 			this.KEYSTORE_PATH = KEYSTORE_PATH;
 			this.KEYSTORE_PASSWORD = KEYSTORE_PASSWORD;
-			
+
 			/* Load up Keystore */
 	    	Security.addProvider(new BouncyCastleProvider());	
 			keystore = KeyStore.getInstance(KEYSTORE_INSTANCE);	
-	    	keystore.load(new FileInputStream(KEYSTORE_PATH), (KEYSTORE_PASSWORD).toCharArray());
-	    	
+			keystore.load(IOUtils.getResourceAsStream(KEYSTORE_PATH, getClass()), (KEYSTORE_PASSWORD).toCharArray());
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
@@ -87,6 +89,7 @@ public class SMIMEVerifier
 			return MdnType.INTEGRITY_CHECK_FAILED;					
 		
 		} catch (Exception e){
+			e.printStackTrace();
 			return MdnType.UNEXPECTED_PROCESSING_ERROR;
 		} 
 		
@@ -109,7 +112,6 @@ public class SMIMEVerifier
 				
 		try {
 
-			
 			/* Get Certificate */
 			X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
 			
@@ -133,9 +135,11 @@ public class SMIMEVerifier
 	
 			}
 		} catch (CMSException e){
+			e.printStackTrace();
 			throw e;
 		
 		}  catch (Exception e) {
+			e.printStackTrace();
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}
 		

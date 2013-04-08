@@ -84,24 +84,30 @@ public class MDNBuilder  {
 
 		try {
 			MdnType mdnType = null;
-				
+
 			if(!(message.getPayload() instanceof MimeMultipart)) {
+
 				throw new TransformerException(CoreMessages.failedToCreate("MDN Message"));
 			} 	
-				MimeMultipart mime = (MimeMultipart) message.getPayload();
-			
-			if (mime.getCount() == 1) {
-				/* It is just a plain text so it is processed automatically */
-				mdnType = MdnType.PROCESSED;
-			}	
-			else {
-				/* Determine the MDN type to send based on the correctness of the SMIME */
-				mdnType = smimeVerifier.checkSMIME(mime, partnerId);
-					
+			try {
+					MimeMultipart mime = (MimeMultipart) message.getPayload();
+				
+				if (mime.getCount() == 1) {
+					/* It is just a plain text so it is processed automatically */
+					mdnType = MdnType.PROCESSED;
+				}	
+				else {
+	
+					/* Determine the MDN type to send based on the correctness of the SMIME */
+					mdnType = smimeVerifier.checkSMIME(mime, partnerId);
+						
+				}
+			} catch (Exception e) {
+				mdnType = MdnType.UNEXPECTED_PROCESSING_ERROR;
 			}
 			mdn.addBodyPart(createDescrPart(mdnType));
 			mdn.addBodyPart(createDispositionPart((String) message.getProperty("message-id", PropertyScope.INBOUND), (String) message.getProperty("as2-to", PropertyScope.INBOUND), mdnType));
-		
+
 			String BOUNDARY_STRING = "----=_Part_" + RandomStringUtils.randomAlphanumeric(20);
 			
 			/* Set HTTP Headers */
@@ -112,9 +118,9 @@ public class MDNBuilder  {
 			message.setProperty(AS2Constants.HEADER_FROM, message.getProperty(AS2Constants.HEADER_TO, PropertyScope.INBOUND), PropertyScope.OUTBOUND);
 		
 			message.setProperty("mdnType", mdnType, PropertyScope.INBOUND);
-			
+
 			message.setProperty(AS2Constants.HEADER_CONTENT_TYPE, "multipart/report; report-type=disposition-notification;" + getBoundary(mdn.getContentType()), PropertyScope.OUTBOUND);
-			
+
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			mdn.writeTo(baos);
 			message.setPayload(baos.toByteArray());
