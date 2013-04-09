@@ -161,12 +161,15 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
     private void setAS2Headers(MuleEvent event, HttpMethod httpMethod) {
     	String asTo = as2Connector.getPartnerId();
     	String asFrom = as2Connector.getSenderId();
+    	String subject = (String) endpoint.getProperty("subject");
     	
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_TO, asTo));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_FROM, asFrom));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_MESSAGE_ID, "<AS2_"+RandomStringUtils.randomAlphanumeric(4) + "@" + asFrom + "_" + asTo + ">"));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED));
-    	
+    	if (subject != null) {
+    		httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SUBJECT, subject));
+    	}
     }
 
 
