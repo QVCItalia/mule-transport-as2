@@ -21,12 +21,13 @@
         <xsd:appinfo>
             <schemadoc:short-name>As2</schemadoc:short-name>
             <schemadoc:page-title>As2 Transport</schemadoc:page-title>
-            <schemadoc:transport-features
-            receiveEvents="true" dispatchEvents="false" responseEvents="true"
+            <schemadoc:transport-features receiveEvents="true" dispatchEvents="false" 
+            							  responseEvents="true"
                                           requestEvents="false"
                                           transactions="false" streaming="false">
-                <schemadoc:inboundMEPs in-only="true" in-optional-out="true" in-out="true"/>
-                <schemadoc:outboundMEPs out-only="true" out-in="true" out-optional-in="true"/>
+<!--                <schemadoc:inboundMEPs in-only="true" in-optional-out="true" in-out="true"/>-->
+<!--                <schemadoc:outboundMEPs out-only="true" out-in="true" out-optional-in="true"/>-->
+                <schemadoc:MEPs supported="one-way, request-response" default="one-way"/>
             </schemadoc:transport-features>
         </xsd:appinfo>
     </xsd:annotation>

@@ -77,7 +77,7 @@ public class SMIMEVerifier
 	}
 	
 
-	public MdnType checkSMIME(MimeMultipart smime, String alias) {
+	public MdnType checkSMIME(MimeMultipart smime, String alias)  {
 		
 		try {
 							

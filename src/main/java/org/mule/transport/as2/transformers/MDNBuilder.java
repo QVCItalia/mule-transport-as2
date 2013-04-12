@@ -80,8 +80,8 @@ public class MDNBuilder  {
 	 * */
 	public MuleMessage createMDN(MuleMessage message, String partnerId) throws TransformerException {
 		
-		MimeMultipart mdn = new MimeMultipart();
 
+		/* Get the MdnType based on the content */
 		try {
 			MdnType mdnType = null;
 
@@ -105,26 +105,10 @@ public class MDNBuilder  {
 			} catch (Exception e) {
 				mdnType = MdnType.UNEXPECTED_PROCESSING_ERROR;
 			}
-			mdn.addBodyPart(createDescrPart(mdnType));
-			mdn.addBodyPart(createDispositionPart((String) message.getProperty("message-id", PropertyScope.INBOUND), (String) message.getProperty("as2-to", PropertyScope.INBOUND), mdnType));
-
-			String BOUNDARY_STRING = "----=_Part_" + RandomStringUtils.randomAlphanumeric(20);
-			
-			/* Set HTTP Headers */
-			message.setProperty(AS2Constants.HEADER_CONTENT_TYPE, "multipart/report; report-type=disposition-notification; boundary=\"" + BOUNDARY_STRING + "\"", PropertyScope.OUTBOUND);
-			message.setProperty(AS2Constants.HEADER_TO, message.getProperty(AS2Constants.HEADER_FROM, PropertyScope.INBOUND), PropertyScope.OUTBOUND);
-			message.setProperty(AS2Constants.HEADER_MESSAGE_ID,"_" + RandomStringUtils.randomAlphanumeric(4), PropertyScope.OUTBOUND);
-			message.setProperty("mime-version", "1.0", PropertyScope.OUTBOUND);
-			message.setProperty(AS2Constants.HEADER_FROM, message.getProperty(AS2Constants.HEADER_TO, PropertyScope.INBOUND), PropertyScope.OUTBOUND);
+	
+			/* Create the MDN based on the mdnType */
+			message = createMDNInstance(message, partnerId, mdnType);
 		
-			message.setProperty("mdnType", mdnType, PropertyScope.INBOUND);
-
-			message.setProperty(AS2Constants.HEADER_CONTENT_TYPE, "multipart/report; report-type=disposition-notification;" + getBoundary(mdn.getContentType()), PropertyScope.OUTBOUND);
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			mdn.writeTo(baos);
-			message.setPayload(baos.toByteArray());
-			
 		} catch (MessagingException e) {
 			throw new TransformerException(CoreMessages.failedToCreate("MDN Message"));
 		} catch (IOException e) {
@@ -134,7 +118,52 @@ public class MDNBuilder  {
 			
 		
 		return message;
+			
+			
 	}
+	
+	/**
+	 * 
+	 * Create Processing Error MDN 
+	 * 
+	 * */
+	public MuleMessage createErroredMDN(MuleMessage message, String partnerId) throws IOException{
+		
+			try {
+				return createMDNInstance(message, partnerId, MdnType.UNEXPECTED_PROCESSING_ERROR);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				throw new IOException();
+			}		
+	}
+	
+	
+	private MuleMessage createMDNInstance(MuleMessage message, String partnerId, MdnType mdnType) throws MessagingException, IOException {
+		
+		MimeMultipart mdn = new MimeMultipart();
+		mdn.addBodyPart(createDescrPart(mdnType));
+		mdn.addBodyPart(createDispositionPart((String) message.getProperty("message-id", PropertyScope.INBOUND), (String) message.getProperty("as2-to", PropertyScope.INBOUND), mdnType));
+
+		String BOUNDARY_STRING = "----=_Part_" + RandomStringUtils.randomAlphanumeric(20);
+		
+		/* Set HTTP Headers */
+		message.setProperty(AS2Constants.HEADER_CONTENT_TYPE, "multipart/report; report-type=disposition-notification; boundary=\"" + BOUNDARY_STRING + "\"", PropertyScope.OUTBOUND);
+		message.setProperty(AS2Constants.HEADER_TO, message.getProperty(AS2Constants.HEADER_FROM, PropertyScope.INBOUND), PropertyScope.OUTBOUND);
+		message.setProperty(AS2Constants.HEADER_MESSAGE_ID,"_" + RandomStringUtils.randomAlphanumeric(4), PropertyScope.OUTBOUND);
+		message.setProperty("mime-version", "1.0", PropertyScope.OUTBOUND);
+		message.setProperty(AS2Constants.HEADER_FROM, message.getProperty(AS2Constants.HEADER_TO, PropertyScope.INBOUND), PropertyScope.OUTBOUND);
+	
+		message.setProperty("mdnType", mdnType, PropertyScope.INBOUND);
+
+		message.setProperty(AS2Constants.HEADER_CONTENT_TYPE, "multipart/report; report-type=disposition-notification;" + getBoundary(mdn.getContentType()), PropertyScope.OUTBOUND);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		mdn.writeTo(baos);
+		message.setPayload(baos.toByteArray());
+		
+		return message;
+	}
+	
 	
 	
 	/* Generate Description Body part of the MDN */
