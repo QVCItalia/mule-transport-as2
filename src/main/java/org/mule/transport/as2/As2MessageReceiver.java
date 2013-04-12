@@ -170,7 +170,8 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			try {
 				/* Payload is always body part 0 */
 				payload = (MimeBodyPart) ((MimeMultipart)message.getPayload()).getBodyPart(0);
-
+				logger.debug(payload.getContent());
+				
 			} catch (javax.mail.MessagingException e2) {
 			// TODO Auto-generated catch block
 				System.out.println("DBG: Exception");
@@ -181,7 +182,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			/* 2) Create MDN accordingly to the SMIME check */
 			mdnMessage = mdnBuilder.createMDN(smimeMessage, as2Connector.getPartnerId());
 			
-			/* If the MdnType is not PROCESSED no Mule Message has routed */
+			/* If the MdnType is not PROCESSED no Mule Message has routed and the MDN is sent back immediately */
 			if (!(mdnMessage.getProperty("mdnType", PropertyScope.INBOUND) == MdnType.PROCESSED)) {
 //				MuleEvent event = new DefaultMuleEvent(message, (InboundEndpoint) endpoint, flowConstruct);
 				return transformResponse(mdnMessage, event);
@@ -240,6 +241,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
               	ExecutionTemplate<MuleEvent> executionTemplate = createExecutionTemplate();
 
 
+              	/* Route the message into the flow */
               	try {
 					returnEvent = executionTemplate.execute(new ExecutionCallback<MuleEvent>()
 					{
@@ -252,10 +254,18 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 					});
               		} catch (Exception e) {
               			// TODO Auto-generated catch block
-              			e.printStackTrace();
+//              			e.printStackTrace();
+              			logger.error(e.getMessage());
+              			// Exception in the flow -> send MDN UNEXPECTED_PROCESSING_ERROR
+						return transformResponse(mdnBuilder.createErroredMDN(smimeMessage, as2Connector.getPartnerId()), event);
+		
               		}
       
-                                             
+                  
+              	  /* exchangePattern="one-way" returnEvent == null otherwise is the latest message of the flow */
+                  /* Maybe inspecting the message is not necessary */
+//                  MuleMessage returnMessage = returnEvent == null ? null : returnEvent.getMessage();	
+              		
             	              	
 	              // This removes the need for users to explicitly adding the response transformer
 	              // ObjectToHttpResponse in their config

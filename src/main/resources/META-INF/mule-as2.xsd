@@ -25,8 +25,9 @@
             							  responseEvents="true"
                                           requestEvents="false"
                                           transactions="false" streaming="false">
-                <schemadoc:inboundMEPs in-only="true" in-optional-out="true" in-out="true"/>
-                <schemadoc:outboundMEPs out-only="true" out-in="true" out-optional-in="true"/>
+<!--                <schemadoc:inboundMEPs in-only="true" in-optional-out="true" in-out="true"/>-->
+<!--                <schemadoc:outboundMEPs out-only="true" out-in="true" out-optional-in="true"/>-->
+                <schemadoc:MEPs supported="one-way, request-response" default="one-way"/>
             </schemadoc:transport-features>
         </xsd:appinfo>
     </xsd:annotation>
