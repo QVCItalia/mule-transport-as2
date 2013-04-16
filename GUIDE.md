@@ -78,20 +78,44 @@ The AS2 connector is based on HTTP connector and supports all its attributes tog
 		<td>string</td>
 		<td>yes</td>	
 		<td></td>
+		<td><p>Business Partner Identifier, it specifies the receiver of the message. The name the business partner is expecting in the AS2 Message for the header "AS2-to"</p>
+		</td>		
+	<tr>
+		<td>partnerId</td>
+		<td>string</td>
+		<td>yes</td>	
+		<td></td>
 		<td><p>Business Partner Identifier, it specifies the receiver of the message. The name the business partner is expecting in the AS2 Message for the header "AS2-to"</p></td>							
-	</tr>		
+	</tr>				
 </table>
 
 This connector also accepts all the attributes from HTTP Connector
 
 ### Inbound Endpoint Attributes
 
-An inbound AS2 endpoint has no different attributes from an HTTP inbound endpoint.
+An inbound AS2 endpoint has no different attributes from an HTTP inbound endpoint, but an important one is exchange-pattern.
 You can check the available ones from the <a href="http://www.mulesoft.org/documentation-3.2/display/MULE2USER/HTTP+Transport" title="HTTP Transport">HTTP inbound endpoint</a>.
+
+<table class="confluenceTable" >
+	<tr>
+		<th>Name</th>
+		<th>Type</th>
+		<th>Required</th>
+		<th>Default</th>		
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>exchange-pattern</td>
+		<td>one-way, request-response</td>
+		<td>no</td>	
+		<td>one-way</td>
+		<td><p>It defines if the endpoint sends the MDN immediately back to sender, one-way, or it waits for the completion of the flow, request-response; in the second case it sends back a MDN UNEXPECTED_PROCESSING_ERROR if an exception occurs during the flow</p></td>							
+	</tr>
+</table>
 
 For example:
 
-	<as2:inbound-endpoint address="as2://localhost:8081/as2-receiver" />
+	<as2:inbound-endpoint address="as2://localhost:8081/as2-receiver" exchange-pattern="request-response" />
 
 
 ### Outbound Endpoint Attributes
@@ -111,6 +135,13 @@ For example:
 		<td></td>
 		<td>The file name to use in the AS2 message for the attached file</td>
 	</tr>
+	<tr>
+		<td>subject</td>
+		<td>string</td>
+		<td>no</td>
+		<td></td>
+		<td>The subject header used in the AS2 message</td>
+	</tr>
 </table>
 
 
@@ -118,7 +149,7 @@ For example:
 
 For example:
 
-	<as2:outbound-endpoint address="as2://localhost:8080/as2/as2-receiver" fileName="prefix_name_#[function:datestamp:yyMMdd.HHmmss.SSS].dat />"
+	<as2:outbound-endpoint address="as2://localhost:8080/as2/as2-receiver" fileName="prefix_name_#[function:datestamp:yyMMdd.HHmmss.SSS].dat subject="sku" />"
 
 
 
