@@ -149,6 +149,16 @@
             <xsd:extension base="mule:globalEndpointType">
                 <xsd:attributeGroup ref="http:addressAttributes"/>
                 <xsd:attributeGroup ref="http:propertyAttributes"/>
+               	<xsd:attribute name="fileName" type="xsd:string" use="required">
+        			<xsd:annotation>
+           				<xsd:documentation>It indicates file name used in the AS2 message</xsd:documentation>
+            		</xsd:annotation>
+        		</xsd:attribute>   
+        		<xsd:attribute name="subject" type="xsd:string" use="optional">
+        			<xsd:annotation>
+           				<xsd:documentation>It indicates the subject of the AS2 message</xsd:documentation>
+            		</xsd:annotation>
+        		</xsd:attribute> 
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
