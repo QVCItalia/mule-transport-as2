@@ -111,7 +111,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
 	            /* Check the incoming synch MDN */
 	            MimeMultipart mdn = MDNBuilder.createMDNFromResponse(httpMethod.getResponseBodyAsStream(), "multipart/report");
 	            if (MDNBuilder.identifyMdnType(mdn) != MdnType.PROCESSED) {
-	            	throw new Exception("Transaction not processed correclty");
+	            	throw new Exception("MDN is not of type PROCESSED");
 	            }
             }
         }
