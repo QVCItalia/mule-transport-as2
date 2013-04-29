@@ -18,6 +18,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -46,6 +47,8 @@ public class As2MessBuilder {
 	private KeyStore keystore;	
 	private static As2MessBuilder as2MessBuilder;
 	
+	Logger log = Logger.getLogger(As2MessBuilder.class);
+	
 	private As2MessBuilder(String keystorePath, String keystorePassword, String senderAlias) throws Exception {
 		
 		this.keystorePath = keystorePath;
@@ -53,12 +56,16 @@ public class As2MessBuilder {
 		this.senderAlias = senderAlias;
 		
 		try {
+			log.debug("*** As2MessBuilder:  keystorePath: " + this.keystorePath);
+			log.debug("*** As2MessBuilder:  keystorePassword: " + this.keystorePassword);
+			log.debug("*** As2MessBuilder:  senderAlias: " + this.senderAlias);
+			
 			Security.addProvider(new BouncyCastleProvider());
 	    	keystore = KeyStore.getInstance(KEYSTORE_INSTANCE);
-	    	keystore.load(new FileInputStream(keystorePath), (keystorePassword).toCharArray());
+	    	keystore.load(org.mule.util.IOUtils.getResourceAsStream(this.keystorePath, getClass()), (keystorePassword).toCharArray());
 		
 		} catch(Exception e) {
-			e.printStackTrace();
+			log.error(e,e);
 			throw new Exception("Exception creating As2MessBuilder");
 		}
 	}
@@ -114,7 +121,7 @@ public class As2MessBuilder {
 			deleteTempFile(fileName);
 			
         } catch (Exception e) {
-        	e.printStackTrace();
+        	log.error(e,e);
         }
         	
 			return in;
@@ -135,10 +142,10 @@ public class As2MessBuilder {
 	    	
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e, e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e, e);
 		}
 
     }
