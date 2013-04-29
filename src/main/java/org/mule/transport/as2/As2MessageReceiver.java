@@ -12,6 +12,7 @@ package org.mule.transport.as2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.regex.Matcher;
@@ -22,6 +23,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.resource.spi.work.Work;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.io.IOUtils;
@@ -59,6 +61,8 @@ import org.mule.transport.http.RequestLine;
 import org.mule.transport.http.i18n.HttpMessages;
 import org.mule.util.MapUtils;
 
+import com.sun.mail.util.BASE64DecoderStream;
+
 /**
  * <code>As2MessageReceiver</code> TODO document
  */
@@ -81,7 +85,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			
         } catch (TransformerException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			throw new CreateException(CoreMessages.failedToCreate("AS2 Message Receiver"), null);
 		}
     }
@@ -170,13 +174,25 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			try {
 				/* Payload is always body part 0 */
 				payload = (MimeBodyPart) ((MimeMultipart)message.getPayload()).getBodyPart(0);
-				logger.debug(payload.getContent());
+				logger.debug("DBG: payload is " + IOUtils.toString((InputStream) payload.getContent()));
+				
+				MimeBodyPart signature = (MimeBodyPart)((MimeMultipart)message.getPayload()).getBodyPart(1);
+				logger.debug("DBG: signature is: " + signature.getContent().getClass());
+				
+				BASE64DecoderStream base64DecoderStream = (BASE64DecoderStream) signature.getContent();
+
+				byte[] byteArray = IOUtils.toByteArray(base64DecoderStream);
+				byte[] encodeBase64 = Base64.encodeBase64(byteArray);
+		      
+				logger.debug("DBG: signature is: " + new String(encodeBase64, "UTF-8"));
 				
 			} catch (javax.mail.MessagingException e2) {
 			// TODO Auto-generated catch block
-				System.out.println("DBG: Exception");
-				e2.printStackTrace();
-			}
+				logger.error("Exception: " + e2.getMessage());
+			} catch (Exception e) {
+				logger.error("Exception MIME: " + e.getMessage());
+			} 
+			
             MuleEvent event = new DefaultMuleEvent(message, (InboundEndpoint) endpoint, flowConstruct);
  	  	
 			/* 2) Create MDN accordingly to the SMIME check */
@@ -192,7 +208,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			tempResponse = mdnMessage;
 
         
-			/* Set the message payload of the outgoing message with the body of the incoming http request */
+			/* Set the message   of the outgoing message with the body of the incoming http request */
 			try {
 				message.setPayload(IOUtils.toString((InputStream) payload.getContent()));
 			} catch (javax.mail.MessagingException e1) {

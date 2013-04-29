@@ -5,7 +5,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -15,6 +17,7 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -69,9 +72,8 @@ public class SMIMEVerifier
 			keystore = KeyStore.getInstance(KEYSTORE_INSTANCE);	
 			keystore.load(IOUtils.getResourceAsStream(KEYSTORE_PATH, getClass()), (KEYSTORE_PASSWORD).toCharArray());
 			
-			
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e);
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}
 	}
@@ -89,7 +91,7 @@ public class SMIMEVerifier
 			return MdnType.INTEGRITY_CHECK_FAILED;					
 		
 		} catch (Exception e){
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return MdnType.UNEXPECTED_PROCESSING_ERROR;
 		} 
 		
@@ -114,7 +116,7 @@ public class SMIMEVerifier
 
 			/* Get Certificate */
 			X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-			
+
 			/* Set SMIME Parser */
 			SMIMESignedParser s = new SMIMESignedParser(smime);
 			ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert);		
@@ -135,11 +137,14 @@ public class SMIMEVerifier
 	
 			}
 		} catch (CMSException e){
-			e.printStackTrace();
+			log.error(e);
 			throw e;
 		
+		}  catch (KeyStoreException e) {
+			log.error("****KEYSTORE EXCEPTION : " + e.getMessage());
+			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}  catch (Exception e) {
-			e.printStackTrace();
+			log.error(e);
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}
 		
