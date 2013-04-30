@@ -85,7 +85,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			
         } catch (TransformerException e) {
 			// TODO Auto-generated catch block
-			logger.error(e.getMessage());
+			logger.error(e, e);
 			throw new CreateException(CoreMessages.failedToCreate("AS2 Message Receiver"), null);
 		}
     }
@@ -188,9 +188,9 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 				
 			} catch (javax.mail.MessagingException e2) {
 			// TODO Auto-generated catch block
-				logger.error("Exception: " + e2.getMessage());
+				logger.error(e2, e2);
 			} catch (Exception e) {
-				logger.error("Exception MIME: " + e.getMessage());
+				logger.error(e, e);
 			} 
 			
             MuleEvent event = new DefaultMuleEvent(message, (InboundEndpoint) endpoint, flowConstruct);
@@ -213,7 +213,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 				message.setPayload(IOUtils.toString((InputStream) payload.getContent()));
 			} catch (javax.mail.MessagingException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				logger.error(e1, e1);
 			}
 
 			
@@ -271,7 +271,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
               		} catch (Exception e) {
               			// TODO Auto-generated catch block
 //              			e.printStackTrace();
-              			logger.error(e.getMessage());
+              			logger.error(e, e);
               			// Exception in the flow -> send MDN UNEXPECTED_PROCESSING_ERROR
 						return transformResponse(mdnBuilder.createErroredMDN(smimeMessage, as2Connector.getPartnerId()), event);
 		
@@ -394,7 +394,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			}
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e, e);
 		}
     	
     	message.setProperty(FILE_NAME, fileName, PropertyScope.INBOUND);
