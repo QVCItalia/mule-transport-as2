@@ -137,14 +137,14 @@ public class SMIMEVerifier
 	
 			}
 		} catch (CMSException e){
-			log.error(e);
+			log.error(e, e);
 			throw e;
 		
 		}  catch (KeyStoreException e) {
-			log.error("****KEYSTORE EXCEPTION : " + e.getMessage());
+			log.error(e, e);
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}  catch (Exception e) {
-			log.error(e);
+			log.error(e, e);
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}
 		
