@@ -168,7 +168,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_MESSAGE_ID, "<AS2_"+RandomStringUtils.randomAlphanumeric(4) + "@" + asFrom + "_" + asTo + ">"));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED));
     	if (subject != null) {
-    		httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SUBJECT, subject));
+    		httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SUBJECT, as2Connector.getFilenameParser().getFilename(event.getMessage(), subject)));
     	}
     }
 
