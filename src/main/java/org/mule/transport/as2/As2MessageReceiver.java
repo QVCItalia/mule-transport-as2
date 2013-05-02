@@ -53,7 +53,7 @@ import org.mule.transport.as2.transformers.MDNBuilder;
 import org.mule.transport.as2.transformers.MDNBuilder.MdnType;
 import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
-import org.mule.transport.http.HttpMessageReceiver;
+import org.mule.transport.http.OldHttpMessageReceiver;
 import org.mule.transport.http.HttpRequest;
 import org.mule.transport.http.HttpResponse;
 import org.mule.transport.http.HttpServerConnection;
@@ -66,7 +66,7 @@ import com.sun.mail.util.BASE64DecoderStream;
 /**
  * <code>As2MessageReceiver</code> TODO document
  */
-public class As2MessageReceiver extends  HttpMessageReceiver 
+public class As2MessageReceiver extends  OldHttpMessageReceiver 
 {
 	private String FILE_NAME = "fileName";
 	private String FILE_NAME_PATTERN = "filename=.*";
@@ -152,6 +152,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 		 */
 		protected HttpResponse doRequest(HttpRequest request) throws IOException, MuleException
 		{
+			logger.debug("DBG: Inside doRequest");
 			sendExpect100(request);
 
 			HttpResponse response = null;

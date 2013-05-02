@@ -37,7 +37,6 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleMessage;
 import org.mule.api.transformer.TransformerException;
 import org.mule.api.transport.MessageTypeNotSupportedException;
-import org.mule.transport.AbstractMuleMessageFactory;
 import org.mule.transport.as2.transformers.ByteArraytoSMIME;
 import org.mule.transport.http.CookieHelper;
 import org.mule.transport.http.HttpConnector;
@@ -53,7 +52,7 @@ import org.mule.util.StringUtils;
 /**
  * <code>As2MuleMessageFactory</code> TODO document
  */
-public class As2MuleMessageFactory extends AbstractMuleMessageFactory
+public class As2MuleMessageFactory extends HttpMuleMessageFactory
 {
     private static Log log = LogFactory.getLog(As2MuleMessageFactory.class);
     private static final String DEFAULT_ENCODING = "UTF-8";
@@ -100,8 +99,10 @@ public class As2MuleMessageFactory extends AbstractMuleMessageFactory
         }
     }
 
-    protected Object extractPayloadFromHttpRequest(HttpRequest httpRequest) throws Exception
+    @Override
+    protected Object extractPayloadFromHttpRequest(HttpRequest httpRequest) throws IOException
     {
+    	log.debug("DBG: inside extractPayloadFromHttpRequest");
         Object body = httpRequest.getBody();
 
         // If http method is GET we use the request uri as the payload.
@@ -130,7 +131,7 @@ public class As2MuleMessageFactory extends AbstractMuleMessageFactory
 			body = byteArrayToSMIMETransf.transformMimeMessage(body, "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=sha1;");
 								        	
         } catch (TransformerException e) {
-        	throw new Exception("Transformer Exception");
+        	throw new IOException("Transformer Exception");
         }
 
         
