@@ -107,11 +107,14 @@ public class MDNBuilder  {
 			}
 	
 			/* Create the MDN based on the mdnType */
-			message = createMDNInstance(message, partnerId, mdnType);
+//			message = createMDNInstance(message, partnerId, mdnType);
+			
+			message = createErroredMDN(message, partnerId);
 		
-		} catch (MessagingException e) {
-			throw new TransformerException(CoreMessages.failedToCreate("MDN Message"));
-		} catch (IOException e) {
+		}  //catch (MessagingException e) {
+//			throw new TransformerException(CoreMessages.failedToCreate("MDN Message"));
+//		} 
+			catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 				
