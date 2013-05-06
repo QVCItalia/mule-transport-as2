@@ -128,44 +128,44 @@ public class As2Connector extends HttpConnector
 	@Override
 	protected void doInitialise() throws InitialisationException {
 		
-//		super.doInitialise();
+		super.doInitialise();
 		/* Same as parent */
-		if (clientConnectionManager == null)
-        {
-            clientConnectionManager = new MultiThreadedHttpConnectionManager();
-            String prop = System.getProperty("mule.http.disableCleanupThread");
-            disableCleanupThread = prop != null && prop.equals("true");
-            if (!disableCleanupThread)
-            {
-                connectionCleaner = new IdleConnectionTimeoutThread();
-                connectionCleaner.setName("HttpClient-connection-cleaner-" + getName());
-                connectionCleaner.addConnectionManager(clientConnectionManager);
-                connectionCleaner.start();
-            }
-
-            HttpConnectionManagerParams params = new HttpConnectionManagerParams();
-            if (getSendBufferSize() != INT_VALUE_NOT_SET)
-            {
-                params.setSendBufferSize(getSendBufferSize());
-            }
-            if (getReceiveBufferSize() != INT_VALUE_NOT_SET)
-            {
-                params.setReceiveBufferSize(getReceiveBufferSize());
-            }
-            if (getClientSoTimeout() != INT_VALUE_NOT_SET)
-            {
-                params.setSoTimeout(getClientSoTimeout());
-            }
-            if (getSocketSoLinger() != INT_VALUE_NOT_SET)
-            {
-                params.setLinger(getSocketSoLinger());
-            }
-
-            params.setTcpNoDelay(isSendTcpNoDelay());
-            params.setMaxTotalConnections(dispatchers.getMaxTotal());
-            params.setDefaultMaxConnectionsPerHost(dispatchers.getMaxTotal());
-            clientConnectionManager.setParams(params);
-        }
+//		if (clientConnectionManager == null)
+//        {
+//            clientConnectionManager = new MultiThreadedHttpConnectionManager();
+//            String prop = System.getProperty("mule.http.disableCleanupThread");
+//            disableCleanupThread = prop != null && prop.equals("true");
+//            if (!disableCleanupThread)
+//            {
+//                connectionCleaner = new IdleConnectionTimeoutThread();
+//                connectionCleaner.setName("HttpClient-connection-cleaner-" + getName());
+//                connectionCleaner.addConnectionManager(clientConnectionManager);
+//                connectionCleaner.start();
+//            }
+//
+//            HttpConnectionManagerParams params = new HttpConnectionManagerParams();
+//            if (getSendBufferSize() != INT_VALUE_NOT_SET)
+//            {
+//                params.setSendBufferSize(getSendBufferSize());
+//            }
+//            if (getReceiveBufferSize() != INT_VALUE_NOT_SET)
+//            {
+//                params.setReceiveBufferSize(getReceiveBufferSize());
+//            }
+//            if (getClientSoTimeout() != INT_VALUE_NOT_SET)
+//            {
+//                params.setSoTimeout(getClientSoTimeout());
+//            }
+//            if (getSocketSoLinger() != INT_VALUE_NOT_SET)
+//            {
+//                params.setLinger(getSocketSoLinger());
+//            }
+//
+//            params.setTcpNoDelay(isSendTcpNoDelay());
+//            params.setMaxTotalConnections(dispatchers.getMaxTotal());
+//            params.setDefaultMaxConnectionsPerHost(dispatchers.getMaxTotal());
+//            clientConnectionManager.setParams(params);
+//        }
         //connection manager must be created during initialization due that devkit requires the connection manager before start phase.
         //That's why it not manager only during stop/start phases and must be created also here.
         if (connectionManager == null)
@@ -192,20 +192,22 @@ public class As2Connector extends HttpConnector
 	@Override
     protected void doDispose()
     {
-        if (!disableCleanupThread)
-        {
-            connectionCleaner.shutdown();
-
-            if (!muleContext.getConfiguration().isStandalone())
-            {
-                MultiThreadedHttpConnectionManager.shutdownAll();
-            }
-        }
-        if (this.connectionManager != null)
-        {
-            connectionManager.dispose();
-            connectionManager = null;
-        }
+		super.doDispose();
+		
+//        if (!disableCleanupThread)
+//        {
+//            connectionCleaner.shutdown();
+//
+//            if (!muleContext.getConfiguration().isStandalone())
+//            {
+//                MultiThreadedHttpConnectionManager.shutdownAll();
+//            }
+//        }
+//        if (this.connectionManager != null)
+//        {
+//            connectionManager.dispose();
+//            connectionManager = null;
+//        }
 //        super.doDispose();
     }
 	

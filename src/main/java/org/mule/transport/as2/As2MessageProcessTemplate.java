@@ -71,7 +71,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
     	
     	logger.debug("DBG: inside AS2 createMessageFromSource");
     	
-    	/* Same as create parent */
+    	/* Create the HTTP message */
         MuleMessage muleMessage = super.createMessageFromSource(message);
         
         /* Incoming SMIME */
@@ -111,55 +111,22 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 			logger.error(e, e);
 		}
 		
-		/* Set Mule Message Header with the HTTP incoming headers */
-		/* Not necessary, already copied by the super method */
-//        String path = muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY);
-//        int i = path.indexOf('?');
-//        if (i > -1)
-//        {
-//            path = path.substring(0, i);
-//        }
-//
-//        muleMessage.setProperty(HttpConnector.HTTP_REQUEST_PATH_PROPERTY, path, PropertyScope.INBOUND);
-//
-//        if (logger.isDebugEnabled())
-//        {
-//            logger.debug(muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY));
-//        }
-
-        // determine if the request path on this request denotes a different receiver
-        //final MessageReceiver receiver = getTargetReceiver(message, endpoint);
-
-        // the response only needs to be transformed explicitly if
-        // A) the request was not served or B) a null result was returned
-//        String contextPath = HttpConnector.normalizeUrl(getInboundEndpoint().getEndpointURI().getPath());
-//        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_PATH_PROPERTY,
-//                            contextPath,
-//                            PropertyScope.INBOUND);
-//
-//        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_URI_PROPERTY,
-//                                getInboundEndpoint().getEndpointURI().getAddress(),
-//                            PropertyScope.INBOUND);
-//
-//        muleMessage.setProperty(HttpConnector.HTTP_RELATIVE_PATH_PROPERTY,
-//                            processRelativePath(contextPath, path),
-//                            PropertyScope.INBOUND);
-//
-//        muleMessage.setProperty(MuleProperties.MULE_REMOTE_CLIENT_ADDRESS, httpServerConnection.getRemoteClientAddress(), PropertyScope.INBOUND);
-    
+   
         return muleMessage;
     }
     
-    /* Create the HTTP response back to the requestor */
+    
+    /* *
+     * Create the HTTP response back to the requestor 
+     * 
+     * */
     @Override
     public void sendResponseToClient(MuleEvent responseMuleEvent) throws MuleException
     {
-    	
-    	
+    	    	
         try
         {
-        	       	
-        	
+        	       	       	
             if (logger.isTraceEnabled())
             {
                 logger.trace("Sending http response");
@@ -250,6 +217,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
             //throw new MessagingException(responseMuleEvent,e);
         }
     }
+
     
     /**
      * It handles whenever an exception is thrown 
@@ -285,7 +253,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
       
     
     /**
-     * Check if endpoint has a keep-alive property configured. Note the translation from
+     * Check if the endpoint has a keep-alive property configured. Note the translation from
      * keep-alive in the schema to keepAlive here.
      */
     private boolean getEndpointKeepAliveValue(ImmutableEndpoint ep)
@@ -338,7 +306,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 			logger.error(e, e);
 			
 		}
-
     }
+    
 
 }
