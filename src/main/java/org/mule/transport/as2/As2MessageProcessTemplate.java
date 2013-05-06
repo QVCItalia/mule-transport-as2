@@ -96,7 +96,6 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 		/* If the MdnType is not PROCESSED no Mule Message has routed and the MDN is sent back immediately */
 		if (!(mdnMessage.getProperty("mdnType", PropertyScope.INBOUND) == MdnType.PROCESSED)) {
 			/* TODO: Launch an Exception or something like that and quit processing */
-			//return transformResponse(mdnMessage, event);
 			throw new DefaultMuleException(MessageFactory.createStaticMessage("MDN is not Processed"));
 		}
 		
@@ -113,39 +112,40 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 		}
 		
 		/* Set Mule Message Header with the HTTP incoming headers */
-        String path = muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY);
-        int i = path.indexOf('?');
-        if (i > -1)
-        {
-            path = path.substring(0, i);
-        }
-
-        muleMessage.setProperty(HttpConnector.HTTP_REQUEST_PATH_PROPERTY, path, PropertyScope.INBOUND);
-
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY));
-        }
+		/* Not necessary, already copied by the super method */
+//        String path = muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY);
+//        int i = path.indexOf('?');
+//        if (i > -1)
+//        {
+//            path = path.substring(0, i);
+//        }
+//
+//        muleMessage.setProperty(HttpConnector.HTTP_REQUEST_PATH_PROPERTY, path, PropertyScope.INBOUND);
+//
+//        if (logger.isDebugEnabled())
+//        {
+//            logger.debug(muleMessage.getInboundProperty(HttpConnector.HTTP_REQUEST_PROPERTY));
+//        }
 
         // determine if the request path on this request denotes a different receiver
         //final MessageReceiver receiver = getTargetReceiver(message, endpoint);
 
         // the response only needs to be transformed explicitly if
         // A) the request was not served or B) a null result was returned
-        String contextPath = HttpConnector.normalizeUrl(getInboundEndpoint().getEndpointURI().getPath());
-        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_PATH_PROPERTY,
-                            contextPath,
-                            PropertyScope.INBOUND);
-
-        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_URI_PROPERTY,
-                                getInboundEndpoint().getEndpointURI().getAddress(),
-                            PropertyScope.INBOUND);
-
-        muleMessage.setProperty(HttpConnector.HTTP_RELATIVE_PATH_PROPERTY,
-                            processRelativePath(contextPath, path),
-                            PropertyScope.INBOUND);
-
-        muleMessage.setProperty(MuleProperties.MULE_REMOTE_CLIENT_ADDRESS, httpServerConnection.getRemoteClientAddress(), PropertyScope.INBOUND);
+//        String contextPath = HttpConnector.normalizeUrl(getInboundEndpoint().getEndpointURI().getPath());
+//        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_PATH_PROPERTY,
+//                            contextPath,
+//                            PropertyScope.INBOUND);
+//
+//        muleMessage.setProperty(HttpConnector.HTTP_CONTEXT_URI_PROPERTY,
+//                                getInboundEndpoint().getEndpointURI().getAddress(),
+//                            PropertyScope.INBOUND);
+//
+//        muleMessage.setProperty(HttpConnector.HTTP_RELATIVE_PATH_PROPERTY,
+//                            processRelativePath(contextPath, path),
+//                            PropertyScope.INBOUND);
+//
+//        muleMessage.setProperty(MuleProperties.MULE_REMOTE_CLIENT_ADDRESS, httpServerConnection.getRemoteClientAddress(), PropertyScope.INBOUND);
     
         return muleMessage;
     }
@@ -155,8 +155,6 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
     public void sendResponseToClient(MuleEvent responseMuleEvent) throws MuleException
     {
     	
-    	/* TODO: Exception handling during the flow */
-        //response = transformResponse(mdnBuilder.createErroredMDN(smimeMessage, as2Connector.getPartnerId()));
     	
         try
         {
@@ -171,9 +169,6 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
         	/* TODO: it could be moved */
 			request = getHttpServerConnection().readRequest();
             
-			
-			/* TODO: if responseMuleEvent == Exception send MDN.UNEXPECTED_PROCESSING_ERROR */
-            //MuleMessage returnMessage = mdnBuilder.createErroredMDN(smimeMessage, as2Connector.getPartnerId());
             
             /* We don't care about the message at the end of the flow */
             //MuleMessage returnMessage = responseMuleEvent == null ? null : responseMuleEvent.getMessage();
@@ -192,9 +187,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
             // This removes the need for users to explicitly adding the response transformer
             // ObjectToHttpResponse in their config
             
-            
-            
-            
+                        
             HttpResponse response;
             if (tempResponse instanceof HttpResponse)
             {
@@ -230,9 +223,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
                 }
             }
 
-            
-
-            
+                        
             
             try
             {
@@ -246,10 +237,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
             {
                 logger.trace("HTTP response sent successfully");
             }
-        
-        
-        
-        
+              
         
         }
         catch (Exception e)
@@ -263,68 +251,43 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
         }
     }
     
-    
+    /**
+     * It handles whenever an exception is thrown 
+     * 
+     * */
     @Override
     public void afterFailureProcessingFlow(MuleException messagingException) throws MuleException
     {
     	
-    	sendMDNErrorToClient();
-//        if (!failureSendingResponse)
-//        {
-//            Exception e = messagingException;
-//            MuleEvent response = messagingException.getEvent();
-//            if (response != null &&
-//                response.getMessage().getExceptionPayload() != null &&
-//                response.getMessage().getExceptionPayload().getException() instanceof MessagingException)
-//            {
-//                e = (Exception) response.getMessage().getExceptionPayload().getException();
-//            }
-//
-//            String temp = ExceptionHelper.getErrorMapping(getInboundEndpoint().getConnector().getProtocol(), messagingException.getClass(), getMuleContext());
-//            int httpStatus = Integer.valueOf(temp);
-//            try
-//            {
-//                if (e instanceof  MessagingException)
-//                {
-//                    sendFailureResponseToClient((MessagingException)e, httpStatus);
-//                }
-//                else
-//                {
-//                    sendFailureResponseToClient(httpStatus, e.getMessage());
-//                }
-//            }
-//            catch (IOException ioException)
-//            {
-//                throw new DefaultMuleException(ioException);
-//            }
-//        }
+    	
+    	if (!(mdnMessage.getProperty("mdnType", PropertyScope.INBOUND) == MdnType.PROCESSED)) {
+    		
+    		/* An exception has been thrown by createMessageFromSource() because the signature is not valid */
+    		HttpResponse response = transformResponse(mdnMessage);
+    		
+    		try
+            {
+                httpServerConnection.writeResponse(response, getThrottlingHeaders());
+            }
+            catch (Exception e)
+            {
+                failureSendingResponse = true;
+            }
+    	}
+    	else {
+    		/* An exception has happened during the flow */
+        	sendMDNErrorToClient();
+    	}
+
+
     }
     
+      
     
-//    @Override
-//    public Object acquireMessage() throws MuleException
-//    {
-//        final HttpRequest request;
-//        try
-//        {
-//            request = httpServerConnection.readRequest();
-//        }
-//        catch (IOException e)
-//        {
-//            throw new DefaultMuleException(e);
-//        }
-//        if (request == null)
-//        {
-//            throw new HttpMessageReceiver.EmptyRequestException();
-//        }
-//        this.request = request;
-//        return request;
-//    }
-//    
-//    /**
-//     * Check if endpoint has a keep-alive property configured. Note the translation from
-//     * keep-alive in the schema to keepAlive here.
-//     */
+    /**
+     * Check if endpoint has a keep-alive property configured. Note the translation from
+     * keep-alive in the schema to keepAlive here.
+     */
     private boolean getEndpointKeepAliveValue(ImmutableEndpoint ep)
     {
         String value = (String) ep.getProperty("keepAlive");
@@ -345,6 +308,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
         return throttlingHeaders;
     }
     
+    
     private void addToMapIfNotNull(Map<String,String> map, String key, Long value)
     {
         if (value != null)
@@ -353,19 +317,26 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
         }
     }
     
+    
+    /**
+     * Send and UNEXPECTED_PROCESSING ERROR MDN back to the sender
+     * */
     private void sendMDNErrorToClient() {
     	
         HttpResponse httpResponse;
+        
 		try {
 			httpResponse = transformResponse(mdnBuilder.createErroredMDN(smimeMessage, as2Connector.getPartnerId()));
 	        httpServerConnection.writeResponse(httpResponse, getThrottlingHeaders());
 		
 		} catch (MuleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			logger.error(e, e);
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			logger.error(e, e);
+			
 		}
 
     }

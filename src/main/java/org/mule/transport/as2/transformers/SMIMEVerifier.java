@@ -84,14 +84,17 @@ public class SMIMEVerifier
 		try {
 							
 			if (!verifySignature(smime, alias)) {
+				log.debug("MdnType is: AUTHENTIFICATION_FAILED");
 				return MdnType.AUTHENTIFICATION_FAILED;
 			}
 
 		} catch (CMSException e) {
+			log.debug("MdnType is: INTEGRITY_CHECK_FAILED");
 			return MdnType.INTEGRITY_CHECK_FAILED;					
 		
 		} catch (Exception e){
-			log.error(e.getMessage());
+			log.error(e,e);
+			log.debug("MdnType is UNEXPECTED_PROCESSING_ERROR");
 			return MdnType.UNEXPECTED_PROCESSING_ERROR;
 		} 
 		
