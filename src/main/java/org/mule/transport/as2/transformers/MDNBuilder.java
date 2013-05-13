@@ -14,10 +14,13 @@ import javax.mail.internet.MimeMultipart;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleMessage;
 import org.mule.api.transformer.TransformerException;
 import org.mule.api.transport.PropertyScope;
 import org.mule.config.i18n.CoreMessages;
+import org.mule.transport.http.HttpRequestDispatcherWork;
 
 
 /**
@@ -26,6 +29,8 @@ import org.mule.config.i18n.CoreMessages;
  * 
  * */
 public class MDNBuilder  {
+	
+    private static Log logger = LogFactory.getLog(MDNBuilder.class);
 	
 	private static final String ORIGINAL_RECIPIENT = "Original-Recipient: rfc822; ";
 	private static final String FINAL_RECIPIENT = "Final-Recipient: rfc822; ";
@@ -94,6 +99,7 @@ public class MDNBuilder  {
 				
 				if (mime.getCount() == 1) {
 					/* It is just a plain text so it is processed automatically */
+					logger.debug("AS2 payload is not MIME");
 					mdnType = MdnType.PROCESSED;
 				}	
 				else {
@@ -103,17 +109,23 @@ public class MDNBuilder  {
 						
 				}
 			} catch (Exception e) {
+				
+				logger.debug("Exception during signature checking");
 				mdnType = MdnType.UNEXPECTED_PROCESSING_ERROR;
 			}
 	
 			/* Create the MDN based on the mdnType */
 			message = createMDNInstance(message, partnerId, mdnType);
+			
 		
-		} catch (MessagingException e) {
+		}	catch (MessagingException e) {
+			
+			logger.error(e, e);
 			throw new TransformerException(CoreMessages.failedToCreate("MDN Message"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} 
+			catch (IOException e) {
+				
+			logger.error(e, e);
 		} 				
 			
 		
@@ -131,8 +143,9 @@ public class MDNBuilder  {
 		
 			try {
 				return createMDNInstance(message, partnerId, MdnType.UNEXPECTED_PROCESSING_ERROR);
+			
 			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
+				logger.error(e, e);
 				throw new IOException();
 			}		
 	}

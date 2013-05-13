@@ -10,14 +10,24 @@
 
 package org.mule.transport.as2;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
+import java.net.URI;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
 import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
+import org.mule.api.MuleException;
+import org.mule.api.endpoint.EndpointURI;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.lifecycle.InitialisationException;
+import org.mule.config.i18n.CoreMessages;
+import org.mule.transport.ConnectException;
 import org.mule.transport.file.ExpressionFilenameParser;
 import org.mule.transport.file.FilenameParser;
 import org.mule.transport.http.HttpConnector;
@@ -27,6 +37,11 @@ import org.mule.transport.http.HttpConnector;
  */
 public class As2Connector extends HttpConnector
 {
+	/* Http private member */
+    private boolean disableCleanupThread;
+    private IdleConnectionTimeoutThread connectionCleaner;
+    private As2ConnectionManager connectionManager;
+	
     /* This constant defines the main transport protocol identifier */
     public static final String AS2 = "as2";
 
@@ -112,7 +127,59 @@ public class As2Connector extends HttpConnector
 	
 	@Override
 	protected void doInitialise() throws InitialisationException {
+		
 		super.doInitialise();
+		/* Same as parent */
+//		if (clientConnectionManager == null)
+//        {
+//            clientConnectionManager = new MultiThreadedHttpConnectionManager();
+//            String prop = System.getProperty("mule.http.disableCleanupThread");
+//            disableCleanupThread = prop != null && prop.equals("true");
+//            if (!disableCleanupThread)
+//            {
+//                connectionCleaner = new IdleConnectionTimeoutThread();
+//                connectionCleaner.setName("HttpClient-connection-cleaner-" + getName());
+//                connectionCleaner.addConnectionManager(clientConnectionManager);
+//                connectionCleaner.start();
+//            }
+//
+//            HttpConnectionManagerParams params = new HttpConnectionManagerParams();
+//            if (getSendBufferSize() != INT_VALUE_NOT_SET)
+//            {
+//                params.setSendBufferSize(getSendBufferSize());
+//            }
+//            if (getReceiveBufferSize() != INT_VALUE_NOT_SET)
+//            {
+//                params.setReceiveBufferSize(getReceiveBufferSize());
+//            }
+//            if (getClientSoTimeout() != INT_VALUE_NOT_SET)
+//            {
+//                params.setSoTimeout(getClientSoTimeout());
+//            }
+//            if (getSocketSoLinger() != INT_VALUE_NOT_SET)
+//            {
+//                params.setLinger(getSocketSoLinger());
+//            }
+//
+//            params.setTcpNoDelay(isSendTcpNoDelay());
+//            params.setMaxTotalConnections(dispatchers.getMaxTotal());
+//            params.setDefaultMaxConnectionsPerHost(dispatchers.getMaxTotal());
+//            clientConnectionManager.setParams(params);
+//        }
+        //connection manager must be created during initialization due that devkit requires the connection manager before start phase.
+        //That's why it not manager only during stop/start phases and must be created also here.
+        if (connectionManager == null)
+        {
+            try
+            {
+                connectionManager = new As2ConnectionManager(this, getReceiverWorkManager());
+            }
+            catch (MuleException e)
+            {
+                throw new InitialisationException(CoreMessages.createStaticMessage("failed creating http connection manager"),this);
+            }
+        }
+		
 		
         if (filenameParser != null)
         {
@@ -120,5 +187,48 @@ public class As2Connector extends HttpConnector
         }
 		
 	}
+	
+	
+	@Override
+    protected void doDispose()
+    {
+		super.doDispose();
+		
+//        if (!disableCleanupThread)
+//        {
+//            connectionCleaner.shutdown();
+//
+//            if (!muleContext.getConfiguration().isStandalone())
+//            {
+//                MultiThreadedHttpConnectionManager.shutdownAll();
+//            }
+//        }
+//        if (this.connectionManager != null)
+//        {
+//            connectionManager.dispose();
+//            connectionManager = null;
+//        }
+//        super.doDispose();
+    }
+	
+    @Override
+    protected ServerSocket getServerSocket(URI uri) throws IOException
+    {
+        return super.getServerSocket(uri);
+    }
+    
+    
+    public void connect(EndpointURI endpointURI) throws ConnectException
+    {
+        connectionManager.addConnection(endpointURI);
+    }
+
+    
+    public void disconnect(EndpointURI endpointURI)
+    {
+        connectionManager.removeConnection(endpointURI);
+    }
+    
+    
 
 }
