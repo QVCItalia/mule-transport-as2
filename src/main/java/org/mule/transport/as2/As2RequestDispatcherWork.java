@@ -40,6 +40,8 @@ public class As2RequestDispatcherWork implements Runnable, Expirable {
     @Override
     public void run()
     {
+    	
+        logger.debug("*** Inside AS2RequestDispatcher run");
         try
         {
             long keepAliveTimeout = as2Connector.getKeepAliveTimeout();
