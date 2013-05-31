@@ -98,16 +98,14 @@ public class As2MessageReceiver extends  HttpMessageReceiver
     	logger.debug("DBG: inside " + getClass() + ".processRequest()");
         try {
         	/* Debug incoming request */
-			logger.debug("DBG: HTTP Request Method is: " + httpServerConnection.readRequest().getRequestLine().getMethod());
-			logger.debug("DBG: HTTP Request Path is: " + httpServerConnection.readRequest().getUrlWithoutParams());
-			logger.debug("DBG: HTTP Request Content-Type is: " + httpServerConnection.readRequest().getFirstHeader("content-type"));
-			logger.debug("DBG: HTTP Request AS-From is: " + httpServerConnection.readRequest().getFirstHeader("as2-from"));
-			logger.debug("DBG: HTTP Request AS-To is: " + httpServerConnection.readRequest().getFirstHeader("as2-to"));
-			logger.debug("DBG: HTTP Request AS-Subject is: " + httpServerConnection.readRequest().getFirstHeader("subject"));
-			logger.debug("DBG: HTTP Request Message_Id is: " + httpServerConnection.readRequest().getFirstHeader("message-id"));
-			logger.debug("DBG: HTTP Request Date is: " + httpServerConnection.readRequest().getFirstHeader("date"));
-			logger.debug("DBG: HTTP Request Body is: " + httpServerConnection.readRequest().getBodyString());
-		} catch (IOException e) {
+        	logger.debug("DBG: HTTP Request Line is: " + httpServerConnection.getRequestLine());
+			Header[] headerArray = httpServerConnection.readRequest().getHeaders();
+			for(Header tmpHeader : headerArray) {
+				logger.debug("DBG: " + tmpHeader.getName() + ": " + tmpHeader.getValue());
+			}
+
+			logger.debug("DBG: HTTP Body is: " + httpServerConnection.readRequest().getBodyString());
+		} catch (Exception e) {
 			logger.error(e, e);
 		}
         
