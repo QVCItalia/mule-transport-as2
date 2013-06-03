@@ -102,18 +102,21 @@ public class As2MessageReceiver extends  HttpMessageReceiver
     void processRequest(HttpServerConnection httpServerConnection) throws InterruptedException, MuleException
     {
     	logger.debug("DBG: inside " + getClass() + ".processRequest()");
+
         try {
+
         	/* Debug incoming request */
-        	logger.debug("DBG: HTTP Request Line is: " + httpServerConnection.getRequestLine());
+        	logger.debug("DBG: HTTP Request Line is: " + httpServerConnection.readRequest().getRequestLine());
 			Header[] headerArray = httpServerConnection.readRequest().getHeaders();
 			for(Header tmpHeader : headerArray) {
 				logger.debug("DBG: " + tmpHeader.getName() + ": " + tmpHeader.getValue());
 			}
 
-			logger.debug("DBG: HTTP Body is: " + httpServerConnection.readRequest().getBodyString());
+			// I can't debug the body because getting it is destructive
+//			logger.debug("DBG: HTTP Body is: " + debugHttpRequest.getBodyString());
 			
-			
-			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */ 
+//			
+//			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */ 
 			if (!httpServerConnection.getRequestLine().getMethod().equals("POST")) {
 				
 				/* Set the 501 Response */
