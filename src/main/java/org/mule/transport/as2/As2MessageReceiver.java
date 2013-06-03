@@ -70,6 +70,12 @@ import com.sun.mail.util.BASE64DecoderStream;
  */
 public class As2MessageReceiver extends  HttpMessageReceiver 
 {
+	
+	public final static int NOT_IMPLEMENTED_ERROR_CODE = 501;
+	public final static String NOT_IMPLEMENTED_ERROR_MESSAGE = "Not Implemented";
+	public final static String NOT_IMPLEMENTED_ERROR_PAGE = "<html><header></header><body><h1>501 Not Implemented</h1></body></html>";
+	public final static String CONTENT_TYPE_STRING = "Content-Type";
+	public final static String CONTENT_TYPE_VALUE = "text/html";
 
 	public As2MessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException {
 		super(connector, flowConstruct, endpoint);
@@ -105,13 +111,35 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			}
 
 			logger.debug("DBG: HTTP Body is: " + httpServerConnection.readRequest().getBodyString());
-		} catch (Exception e) {
+			
+			
+			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */ 
+			if (!httpServerConnection.getRequestLine().getMethod().equals("POST")) {
+				
+				/* Set the 501 Response */
+				HttpResponse errorResponse = new HttpResponse();
+				errorResponse.setStatusLine(new HttpVersion(1,1), NOT_IMPLEMENTED_ERROR_CODE, NOT_IMPLEMENTED_ERROR_MESSAGE);
+				errorResponse.setHeader(new Header(CONTENT_TYPE_STRING, CONTENT_TYPE_VALUE));
+				errorResponse.setBody(NOT_IMPLEMENTED_ERROR_PAGE);
+				
+				/* Send 501 Response */
+				httpServerConnection.writeResponse(errorResponse);
+
+			}
+	        else {
+			    As2MessageProcessTemplate messageContext = (As2MessageProcessTemplate) createMessageContext(httpServerConnection);
+			    processMessage(messageContext,messageContext);
+			    messageContext.awaitTermination();
+	        }
+			
+			
+			
+		} catch (IOException e) {
+			logger.error("DBG: HTTP method not supported");
 			logger.error(e, e);
 		}
         
-        As2MessageProcessTemplate messageContext = (As2MessageProcessTemplate) createMessageContext(httpServerConnection);
-        processMessage(messageContext,messageContext);
-        messageContext.awaitTermination();
+
     }
     
     @Override

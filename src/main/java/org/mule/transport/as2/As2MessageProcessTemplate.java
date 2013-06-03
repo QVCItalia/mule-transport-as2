@@ -227,7 +227,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
     public void afterFailureProcessingFlow(MuleException messagingException) throws MuleException
     {
     	
-    	
+    	logger.debug("DBG: inside " + getClass() + ".afterFailureProcessingFlow()");
     	if (!(mdnMessage.getProperty("mdnType", PropertyScope.INBOUND) == MdnType.PROCESSED)) {
     		
     		/* An exception has been thrown by createMessageFromSource() because the signature is not valid */
@@ -244,6 +244,7 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
     	}
     	else {
     		/* An exception has happened during the flow */
+    		logger.debug("DBG: sending errored MDN");
         	sendMDNErrorToClient();
     	}
 

@@ -107,7 +107,8 @@ public class As2MuleMessageFactory extends HttpMuleMessageFactory
 
         // If http method is GET we use the request uri as the payload.
         if (body == null)
-        {
+        {	
+        	log.debug("DBG: body is null");
             body = httpRequest.getRequestLine().getUri();
         }
         else
