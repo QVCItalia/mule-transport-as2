@@ -123,30 +123,36 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 //			logger.debug("DBG: HTTP Body is: " + debugHttpRequest.getBodyString());
 			
 //			
-//			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */
+//			/* Send back a reply based on the request Method */
 			String requestMethod = httpServerConnection.getRequestLine().getMethod();
+			logger.debug("DBG: Request Method is: " + requestMethod);
+			
 			if (!(requestMethod).equals("POST")) {
 				HttpResponse errorResponse = new HttpResponse();
 				
 				if(requestMethod.equals("OPTIONS")) {
+					logger.debug("DBG: sending response for an OPTIONS request");
+					
 					/* Set 200 OK Response*/
 					errorResponse.setStatusLine(new HttpVersion(1,1), OK_CODE, OK_MESSAGE);
 					errorResponse.setHeader(new Header(ALLOW_STRING, ALLOW_VALUE));
 
 				}
 				else {
-				/* Set the 501 Response */
-				errorResponse.setStatusLine(new HttpVersion(1,1), NOT_IMPLEMENTED_ERROR_CODE, NOT_IMPLEMENTED_ERROR_MESSAGE);
-				errorResponse.setHeader(new Header(CONTENT_TYPE_STRING, CONTENT_TYPE_VALUE));
-				errorResponse.setBody(NOT_IMPLEMENTED_ERROR_PAGE);
+					/* Set the 501 Response */
+					errorResponse.setStatusLine(new HttpVersion(1,1), NOT_IMPLEMENTED_ERROR_CODE, NOT_IMPLEMENTED_ERROR_MESSAGE);
+					errorResponse.setHeader(new Header(CONTENT_TYPE_STRING, CONTENT_TYPE_VALUE));
+					errorResponse.setBody(NOT_IMPLEMENTED_ERROR_PAGE);
 				
 				}
 				
 				/* Send Response */
+				logger.debug("DBG: sending HTTP Response");
 				httpServerConnection.writeResponse(errorResponse);
 
 			}
 	        else {
+	        	/* Process the request accordigly to the AS2 protocol */
 			    As2MessageProcessTemplate messageContext = (As2MessageProcessTemplate) createMessageContext(httpServerConnection);
 			    processMessage(messageContext,messageContext);
 			    messageContext.awaitTermination();
