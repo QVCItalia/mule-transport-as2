@@ -74,12 +74,19 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 	public final static int NOT_IMPLEMENTED_ERROR_CODE = 501;
 	public final static String NOT_IMPLEMENTED_ERROR_MESSAGE = "Not Implemented";
 	public final static String NOT_IMPLEMENTED_ERROR_PAGE = "<html><header></header><body><h1>501 Not Implemented</h1></body></html>";
+	
+	public final static int OK_CODE = 200;
+	public final static String OK_MESSAGE = "OK";
+	
+	public final static String ALLOW_STRING = "Allow";
+	public final static String ALLOW_VALUE = "POST,OPTIONS";
+	
 	public final static String CONTENT_TYPE_STRING = "Content-Type";
 	public final static String CONTENT_TYPE_VALUE = "text/html";
 
 	public As2MessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException {
 		super(connector, flowConstruct, endpoint);
-		// TODO Auto-generated constructor stub
+
 	}
 	
     @Override
@@ -116,16 +123,26 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 //			logger.debug("DBG: HTTP Body is: " + debugHttpRequest.getBodyString());
 			
 //			
-//			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */ 
-			if (!httpServerConnection.getRequestLine().getMethod().equals("POST")) {
-				
-				/* Set the 501 Response */
+//			/* Reply with a 501 Not Implemented if HTTP METHOD is not POST */
+			String requestMethod = httpServerConnection.getRequestLine().getMethod();
+			if (!(requestMethod).equals("POST")) {
 				HttpResponse errorResponse = new HttpResponse();
+				
+				if(requestMethod.equals("OPTIONS")) {
+					/* Set 200 OK Response*/
+					errorResponse.setStatusLine(new HttpVersion(1,1), OK_CODE, OK_MESSAGE);
+					errorResponse.setHeader(new Header(ALLOW_STRING, ALLOW_VALUE));
+
+				}
+				else {
+				/* Set the 501 Response */
 				errorResponse.setStatusLine(new HttpVersion(1,1), NOT_IMPLEMENTED_ERROR_CODE, NOT_IMPLEMENTED_ERROR_MESSAGE);
 				errorResponse.setHeader(new Header(CONTENT_TYPE_STRING, CONTENT_TYPE_VALUE));
 				errorResponse.setBody(NOT_IMPLEMENTED_ERROR_PAGE);
 				
-				/* Send 501 Response */
+				}
+				
+				/* Send Response */
 				httpServerConnection.writeResponse(errorResponse);
 
 			}
