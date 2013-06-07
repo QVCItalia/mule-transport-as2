@@ -128,13 +128,11 @@ public class As2MessBuilder {
 			byte[] data = out.toByteArray();
 			in = new ByteArrayInputStream(data);
 			
+			/* Retrieve the "boundary" value created by the Signer */
 			InputStream in2 = new ByteArrayInputStream(data);
 			StringWriter writer = new StringWriter();
 			IOUtils.copy(in2, writer);
 			boundaryValue = getBoundary(writer.toString());
-//			log.debug("DBG: boundary String is: " + boundaryValue);
-			
-//			boundaryValue="--123";
 			
 			/* Clean up */
 			deleteTempFile(fileName);
@@ -187,15 +185,9 @@ public class As2MessBuilder {
      * */
     private String getBoundary(String smime) {
         log.debug("DBG: SMIME is: " + smime);
-//    	String boundaryString = "";
-//    	               
-//        Pattern pattern = Pattern.compile(BOUNDARY_STRING_PATTERN);
-//        Matcher matcher = pattern.matcher(smime);
-//        
-//        while (matcher.find()) {
-//            boundaryString = matcher.group();
-//	        }
-			
+
+        /* Boundary String is the first line of the MIME */
+        /* Maybe we can improve this search */
         String [] lines = smime.split("\n");
         log.debug("DBG: boundary String is: " + lines[0].replace("\n", "").replace("\r", "").substring(2) + "<");
         return lines[0].replace("\n", "").replace("\r", "").substring(2);

@@ -175,25 +175,24 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
     	logger.debug(AS2Constants.HEADER_FROM + ": " + asFrom);
     	String subject = (String) endpoint.getProperty("subject");
     	
-    	httpMethod.setRequestHeader(new Header("content-disposition", "attachment; filename=\"smime.p7m\""));
+    	/* N.B. Content-Type is already set in the AS2ObjectToHttpMethodRequest */
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_DISPOSITION, AS2Constants.HEADER_ATTACHMENT_VALUE));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_FROM, asFrom));
-    	//httpMethod.setRequestHeader(new Header("connection", "close, TE"));
-    	httpMethod.setRequestHeader(new Header("ediint-features", "multiple-attachments, CEM"));    	
-    	httpMethod.setRequestHeader(new Header("date", new Date().toString()));
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_EDIINT_FEATURES, AS2Constants.HEADER_EDIINT_FEATURES_VALUE));    	
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_DATE, new Date().toString()));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_TO, asTo));
-    	httpMethod.setRequestHeader(new Header("disposition-notification-to", "MULE_TEST"));
-    	httpMethod.setRequestHeader(new Header("from", "qvc@qvc.com"));
-    	httpMethod.setRequestHeader(new Header("as2-version", "1.2"));
-    	httpMethod.setRequestHeader(new Header("mime-version", "1.0"));
-    	httpMethod.setRequestHeader(new Header("recipient-address", "http://172.18.48.97:30080/as2"));
-    	
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_DISPOSITION_NOTIFICATION_TO, asFrom));
+//    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SIMPLE_FROM, "qvc@qvc.com"));
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_VERSION, AS2Constants.HEADER_AS2_VERSION_VALUE));
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_MIME_VERSION, AS2Constants.HEADER_MIME_VERSION_VALUE));   	
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_RECIPIENT_ADDRESS, endpoint.getEndpointURI().getAddress().replaceFirst("as2", "http")));   
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_MESSAGE_ID, "<AS2_"+RandomStringUtils.randomAlphanumeric(4) + "@" + asFrom + "_" + asTo + ">"));
-    	//httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED));
+    	
     	
     	if (subject != null) {
     		httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SUBJECT, as2Connector.getFilenameParser().getFilename(event.getMessage(), subject)));
     	}
-    	
+    	/* Remove MULE Message Headers */
     	httpMethod.removeRequestHeader("X-MULE_ENDPOINT");
     	httpMethod.removeRequestHeader("X-MULE_ENCODING");
     	httpMethod.removeRequestHeader("X-MULE_ROOT_MESSAGE_ID");

@@ -21,17 +21,26 @@ public class AS2Constants
     public static final String HEADER_TO = "as2-to";
     public static final String HEADER_MESSAGE_ID = "message-id";
     public static final String HEADER_SUBJECT = "subject";
-    public static final String HEADER_DATE = "Date";
+    public static final String HEADER_DATE = "date";
     public static final String HEADER_MDN = "Disposition-notification-to";
     public static final String HEADER_RECEIVER_RESPONSE = "Receipt-Delivery-Option";    
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
-    public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String HEADER_CONTENT_DISPOSITION = "content-disposition";
+    public static final String HEADER_EDIINT_FEATURES = "ediint-features";
+    public static final String HEADER_DISPOSITION_NOTIFICATION_TO = "disposition-notification-to";
+    public static final String HEADER_SIMPLE_FROM = "from";
+    public static final String HEADER_MIME_VERSION = "mime-version";
+    public static final String HEADER_RECIPIENT_ADDRESS = "recipient-address";
     
     public static final String HEADER_MDN_CONTENT_TYPE = "multipart/report; report-type=disposition-notification; boundary=\"";
-    public static final String HEADER_AS2_MULTIPART_SIGNED = "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=sha1;";
+    public static final String HEADER_AS2_MULTIPART_SIGNED = "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=sha1; boundary=\"";
     public static final String HEADER_TEXT_PLAIN = "text/plain"; 
     public static final String HEADER_7_BIT = "7bit";
+    public static final String HEADER_ATTACHMENT_VALUE = "attachment; filename=\"smime.p7m\"";
+    public static final String HEADER_EDIINT_FEATURES_VALUE = "multiple-attachments, CEM";
+    public static final String HEADER_AS2_VERSION_VALUE = "1.2";
+    public static final String HEADER_MIME_VERSION_VALUE = "1.0";
     
 }
 

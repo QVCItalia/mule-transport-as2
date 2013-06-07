@@ -120,33 +120,33 @@ public class AS2ObjectToHttpMethodRequest extends ObjectToHttpClientMethodReques
 	            if (src instanceof String)
 	            {
 	                postMethod.setRequestEntity(new StringRequestEntity(src.toString(), outboundMimeType, encoding));
-	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + as2MessageBuilder.getBoundaryValue() + "\""));
 	                return;
 	            }
 
 	            if (src instanceof InputStream)
 	            {
 	            	src = as2MessageBuilder.createAS2Signed((InputStream) src, fileName);
-	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + as2MessageBuilder.getBoundaryValue() + "\""));
 	            	postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
 	            else if (src instanceof byte[])
 	            {
 	            	src = as2MessageBuilder.createAS2Signed(new ByteArrayInputStream((byte[]) src), fileName);
-	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
 	            else if (src instanceof OutputHandler)
 	            {
 	                final MuleEvent event = RequestContext.getEvent();
-	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new StreamPayloadRequestEntity((OutputHandler) src, event));
 	            }
 	            else
 	            {
 	                final byte[] buffer = SerializationUtils.serialize((Serializable) src);
 	            	src = as2MessageBuilder.createAS2Signed(new ByteArrayInputStream((byte[]) buffer), fileName);
-	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
 	            
