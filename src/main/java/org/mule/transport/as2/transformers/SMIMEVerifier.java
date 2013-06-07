@@ -62,7 +62,7 @@ public class SMIMEVerifier
 
 	
 	public SMIMEVerifier(String KEYSTORE_PATH, String KEYSTORE_PASSWORD) throws TransformerException {
-		
+		log.debug("DBG: inside " + getClass() + ".SMIMEVerifier()");
 		try {
 			this.KEYSTORE_PATH = KEYSTORE_PATH;
 			this.KEYSTORE_PASSWORD = KEYSTORE_PASSWORD;
@@ -73,14 +73,14 @@ public class SMIMEVerifier
 			keystore.load(IOUtils.getResourceAsStream(KEYSTORE_PATH, getClass()), (KEYSTORE_PASSWORD).toCharArray());
 			
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e, e);
 			throw new TransformerException(CoreMessages.failedToCreate(getName()));
 		}
 	}
 	
 
 	public MdnType checkSMIME(MimeMultipart smime, String alias)  {
-		
+		log.debug("DBG: inside " + getClass() + ".checkSMIME()");
 		try {
 							
 			if (!verifySignature(smime, alias)) {

@@ -9,10 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
@@ -44,6 +47,14 @@ public class As2MessBuilder {
 	final String SIGN_ALGORITHM = "SHA1withRSA";
 	final String PROVIDER_NAME = "BC";
 	
+	private static final String BOUNDARY_STRING_PATTERN = "boundary=.*";
+	private String boundaryValue;
+	
+	public String getBoundaryValue() {
+		return boundaryValue;
+	}
+
+
 	private KeyStore keystore;	
 	private static As2MessBuilder as2MessBuilder;
 	
@@ -116,7 +127,15 @@ public class As2MessBuilder {
 			smime.writeTo(out);
 			byte[] data = out.toByteArray();
 			in = new ByteArrayInputStream(data);
-						
+			
+			InputStream in2 = new ByteArrayInputStream(data);
+			StringWriter writer = new StringWriter();
+			IOUtils.copy(in2, writer);
+			boundaryValue = getBoundary(writer.toString());
+//			log.debug("DBG: boundary String is: " + boundaryValue);
+			
+//			boundaryValue="--123";
+			
 			/* Clean up */
 			deleteTempFile(fileName);
 			
@@ -125,6 +144,8 @@ public class As2MessBuilder {
         }
         	
 			return in;
+        // Return plain text for testing in GEODIS
+//        return new ByteArrayInputStream("TEST".getBytes());
         }
     
     
@@ -158,5 +179,25 @@ public class As2MessBuilder {
     	
     	File file = new File(fileName);
     	file.delete();
+    }
+    
+    
+    /**
+     * Find boundary string
+     * */
+    private String getBoundary(String smime) {
+        log.debug("DBG: SMIME is: " + smime);
+//    	String boundaryString = "";
+//    	               
+//        Pattern pattern = Pattern.compile(BOUNDARY_STRING_PATTERN);
+//        Matcher matcher = pattern.matcher(smime);
+//        
+//        while (matcher.find()) {
+//            boundaryString = matcher.group();
+//	        }
+			
+        String [] lines = smime.split("\n");
+        log.debug("DBG: boundary String is: " + lines[0].replace("\n", "").replace("\r", "").substring(2) + "<");
+        return lines[0].replace("\n", "").replace("\r", "").substring(2);
     }
 }

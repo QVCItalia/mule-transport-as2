@@ -12,6 +12,7 @@ package org.mule.transport.as2;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 import javax.mail.internet.MimeMultipart;
@@ -86,6 +87,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
     @Override
     protected void doDispatch(MuleEvent event) throws Exception
     {
+    	logger.debug("DBG: inside " + getClass() + ".doDispatch()");
         HttpMethod httpMethod = getMethod(event);
         as2Connector.setupClientAuthorizationLocal(event, httpMethod, client, endpoint);
 
@@ -108,6 +110,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
                 }
             }
             else {
+            	logger.debug("DBG: response Body is: " + httpMethod.getResponseBodyAsString());
 	            /* Check the incoming synch MDN */
 	            MimeMultipart mdn = MDNBuilder.createMDNFromResponse(httpMethod.getResponseBodyAsStream(), "multipart/report");
 	            if (MDNBuilder.identifyMdnType(mdn) != MdnType.PROCESSED) {
@@ -123,6 +126,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
 
     protected HttpMethod execute(MuleEvent event, HttpMethod httpMethod) throws Exception
     {
+    	logger.debug("DBG: inside " + getClass() + ".execute()");
         // TODO set connection timeout buffer etc
         try
         {
@@ -133,7 +137,10 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
             this.processMuleSession(event, httpMethod);
             this.setAS2Headers(event, httpMethod);
 
+            logger.debug("DBG: Contenty Type is: " + httpMethod.getRequestHeader(AS2Constants.HEADER_CONTENT_TYPE));
+
             // TODO can we use the return code for better reporting?
+//            client.setConnectionTimeout(20000);
             client.executeMethod(getHostConfig(uri), httpMethod);
 
             return httpMethod;
@@ -141,10 +148,12 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
         catch (IOException e)
         {
             // TODO employ dispatcher reconnection strategy at this point
+        	logger.error(e, e);
             throw new DispatchException(event, getEndpoint(), e);
         }
         catch (Exception e)
         {
+        	logger.error(e, e);
             throw new DispatchException(event, getEndpoint(), e);
         }
 
@@ -159,23 +168,44 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
      * Set AS2 Specific Headers
      * */
     private void setAS2Headers(MuleEvent event, HttpMethod httpMethod) {
+    	logger.debug("DBG: inside " + getClass() + ".setAS2Headers()");
     	String asTo = as2Connector.getPartnerId();
+    	logger.debug(AS2Constants.HEADER_TO + ": " + asTo);
     	String asFrom = as2Connector.getSenderId();
+    	logger.debug(AS2Constants.HEADER_FROM + ": " + asFrom);
     	String subject = (String) endpoint.getProperty("subject");
     	
-    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_TO, asTo));
+    	httpMethod.setRequestHeader(new Header("content-disposition", "attachment; filename=\"smime.p7m\""));
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_FROM, asFrom));
+    	//httpMethod.setRequestHeader(new Header("connection", "close, TE"));
+    	httpMethod.setRequestHeader(new Header("ediint-features", "multiple-attachments, CEM"));    	
+    	httpMethod.setRequestHeader(new Header("date", new Date().toString()));
+    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_TO, asTo));
+    	httpMethod.setRequestHeader(new Header("disposition-notification-to", "MULE_TEST"));
+    	httpMethod.setRequestHeader(new Header("from", "qvc@qvc.com"));
+    	httpMethod.setRequestHeader(new Header("as2-version", "1.2"));
+    	httpMethod.setRequestHeader(new Header("mime-version", "1.0"));
+    	httpMethod.setRequestHeader(new Header("recipient-address", "http://172.18.48.97:30080/as2"));
+    	
     	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_MESSAGE_ID, "<AS2_"+RandomStringUtils.randomAlphanumeric(4) + "@" + asFrom + "_" + asTo + ">"));
-    	httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED));
+    	//httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED));
+    	
     	if (subject != null) {
     		httpMethod.setRequestHeader(new Header(AS2Constants.HEADER_SUBJECT, as2Connector.getFilenameParser().getFilename(event.getMessage(), subject)));
     	}
+    	
+    	httpMethod.removeRequestHeader("X-MULE_ENDPOINT");
+    	httpMethod.removeRequestHeader("X-MULE_ENCODING");
+    	httpMethod.removeRequestHeader("X-MULE_ROOT_MESSAGE_ID");
+    	httpMethod.removeRequestHeader("X-MULE_CORRELATION_ID");
+    	httpMethod.removeRequestHeader("X-MULE_SESSION");
     }
 
 
     protected HttpMethod getMethod(MuleEvent event) throws TransformerException
     {
 
+    	logger.debug("DBG: inside " + getClass() + ".getMethod()");
         // Configure timeout. This is done here because MuleEvent.getTimeout() takes
         // precedence and is not available before send/dispatch.
         // Given that dispatchers are borrowed from a thread pool mutating client

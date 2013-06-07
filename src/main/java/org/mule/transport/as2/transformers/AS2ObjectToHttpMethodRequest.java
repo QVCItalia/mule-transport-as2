@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -46,6 +47,7 @@ public class AS2ObjectToHttpMethodRequest extends ObjectToHttpClientMethodReques
 	
 	protected void setupEntityMethod(Object src, String encoding, MuleMessage msg, EntityEnclosingMethod postMethod) throws UnsupportedEncodingException, TransformerException
 	    {
+			logger.debug("DBG: inside " + getClass() + ".setupEntityMethod()");
 			// Dont set a POST payload if the body is a Null Payload.
 	        // This way client calls can control if a POST body is posted explicitly
 	        if (!(msg.getPayload() instanceof NullPayload))
@@ -109,7 +111,6 @@ public class AS2ObjectToHttpMethodRequest extends ObjectToHttpClientMethodReques
 		            try {
 						as2MessageBuilder = As2MessBuilder.getAs2MessBuilder(connector.getKeystorePath(), connector.getKeystorePassword(), connector.getSenderId());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						logger.error("Exception creating As2MessBuilder");
 						throw new TransformerException(this, e);
 					}
@@ -119,30 +120,37 @@ public class AS2ObjectToHttpMethodRequest extends ObjectToHttpClientMethodReques
 	            if (src instanceof String)
 	            {
 	                postMethod.setRequestEntity(new StringRequestEntity(src.toString(), outboundMimeType, encoding));
+	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
 	                return;
 	            }
 
 	            if (src instanceof InputStream)
 	            {
 	            	src = as2MessageBuilder.createAS2Signed((InputStream) src, fileName);
-	                postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
+	            	postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
 	            else if (src instanceof byte[])
 	            {
 	            	src = as2MessageBuilder.createAS2Signed(new ByteArrayInputStream((byte[]) src), fileName);
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
 	            else if (src instanceof OutputHandler)
 	            {
 	                final MuleEvent event = RequestContext.getEvent();
+	                postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new StreamPayloadRequestEntity((OutputHandler) src, event));
 	            }
 	            else
 	            {
 	                final byte[] buffer = SerializationUtils.serialize((Serializable) src);
 	            	src = as2MessageBuilder.createAS2Signed(new ByteArrayInputStream((byte[]) buffer), fileName);
+	            	postMethod.setRequestHeader(new Header(AS2Constants.HEADER_CONTENT_TYPE, AS2Constants.HEADER_AS2_MULTIPART_SIGNED + " boundary=\"" + as2MessageBuilder.getBoundaryValue() + "\""));
 	                postMethod.setRequestEntity(new InputStreamRequestEntity((InputStream) src, outboundMimeType));
 	            }
+	            
+	           
 	        }
 	        else if (msg.getOutboundAttachmentNames() != null && msg.getOutboundAttachmentNames().size() > 0)
 	        {

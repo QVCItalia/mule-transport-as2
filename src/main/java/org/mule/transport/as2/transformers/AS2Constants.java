@@ -16,11 +16,11 @@ package org.mule.transport.as2.transformers;
 public class AS2Constants
 {
 
-    public static final String HEADER_VERSION = "AS2-Version";
-    public static final String HEADER_FROM = "AS2-From";
-    public static final String HEADER_TO = "AS2-To";
-    public static final String HEADER_MESSAGE_ID = "Message-Id";
-    public static final String HEADER_SUBJECT = "Subject";
+    public static final String HEADER_VERSION = "as2-version";
+    public static final String HEADER_FROM = "as2-from";
+    public static final String HEADER_TO = "as2-to";
+    public static final String HEADER_MESSAGE_ID = "message-id";
+    public static final String HEADER_SUBJECT = "subject";
     public static final String HEADER_DATE = "Date";
     public static final String HEADER_MDN = "Disposition-notification-to";
     public static final String HEADER_RECEIVER_RESPONSE = "Receipt-Delivery-Option";    
@@ -29,7 +29,7 @@ public class AS2Constants
     public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     
     public static final String HEADER_MDN_CONTENT_TYPE = "multipart/report; report-type=disposition-notification; boundary=\"";
-    public static final String HEADER_AS2_MULTIPART_SIGNED = "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=sha1";
+    public static final String HEADER_AS2_MULTIPART_SIGNED = "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=sha1;";
     public static final String HEADER_TEXT_PLAIN = "text/plain"; 
     public static final String HEADER_7_BIT = "7bit";
     

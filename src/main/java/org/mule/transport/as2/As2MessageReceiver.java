@@ -120,7 +120,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 			}
 
 			// I can't debug the body because getting it is destructive
-//			logger.debug("DBG: HTTP Body is: " + debugHttpRequest.getBodyString());
+//			logger.debug("DBG: HTTP Body is: " + httpServerConnection.readRequest().getBodyString());
 			
 //			
 //			/* Send back a reply based on the request Method */
@@ -152,6 +152,8 @@ public class As2MessageReceiver extends  HttpMessageReceiver
 
 			}
 	        else {
+				// I can't debug the body because getting it is destructive
+//				logger.debug("DBG: HTTP Body is: " + httpServerConnection.readRequest().getBodyString());
 	        	/* Process the request accordigly to the AS2 protocol */
 			    As2MessageProcessTemplate messageContext = (As2MessageProcessTemplate) createMessageContext(httpServerConnection);
 			    processMessage(messageContext,messageContext);
