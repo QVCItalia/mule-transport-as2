@@ -2,10 +2,14 @@ package org.mule.transport.as2.transformers;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.Security;
@@ -114,7 +118,7 @@ public class SMIMEVerifier
 	 * 
 	 * */
 	private boolean verifySignature(MimeMultipart smime, String alias) throws CMSException, TransformerException  {
-				
+						
 		try {
 
 			/* Get Certificate */
@@ -135,6 +139,7 @@ public class SMIMEVerifier
 				
 				/* If one of the signatures is not verified verification fails */
 				if (!signer.verify(signVerifier)) {
+					log.debug("DBG: signature is not verified");
 					return false;
 				}
 	
