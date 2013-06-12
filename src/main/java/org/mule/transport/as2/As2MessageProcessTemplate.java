@@ -102,7 +102,11 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 				
         /* Set the body of the outgoing message with the plain text of the incoming SMIME */
 		try {
-			muleMessage.setPayload(IOUtils.toString((InputStream) payload.getContent()));		
+			String fileName = payload.getFileName();
+			logger.debug("DBG: fileName is: " + fileName);
+			muleMessage.setPayload(IOUtils.toString((InputStream) payload.getContent()));	
+			/* Set fileName INBOUND PROPERTY*/
+			muleMessage.setProperty("fileName", fileName, PropertyScope.INBOUND);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error(e, e);
