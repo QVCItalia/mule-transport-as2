@@ -106,7 +106,7 @@ public class As2MessageReceiver extends  HttpMessageReceiver
         return new As2MessageProcessTemplate(this,httpServerConnection,getWorkManager(), (As2Connector) connector);
     }
 
-    void processRequest(HttpServerConnection httpServerConnection) throws InterruptedException, MuleException
+    synchronized void processRequest(HttpServerConnection httpServerConnection) throws InterruptedException, MuleException
     {
     	logger.debug("DBG: inside " + getClass() + ".processRequest()");
 
