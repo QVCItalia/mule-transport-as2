@@ -104,7 +104,13 @@ public class As2MessageProcessTemplate extends HttpMessageProcessTemplate{
 		try {
 			String fileName = payload.getFileName();
 			logger.debug("DBG: fileName is: " + fileName);
-			muleMessage.setPayload(IOUtils.toString((InputStream) payload.getContent()));	
+			if (payload.getContent() instanceof InputStream) {
+				muleMessage.setPayload(IOUtils.toString((InputStream) payload.getContent()));
+			}
+			else {
+				muleMessage.setPayload((String)payload.getContent());
+			}
+				
 			/* Set fileName INBOUND PROPERTY*/
 			muleMessage.setProperty("fileName", fileName, PropertyScope.INBOUND);
 		} catch (IOException e) {
