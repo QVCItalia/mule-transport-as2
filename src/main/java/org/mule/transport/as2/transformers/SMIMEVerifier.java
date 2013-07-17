@@ -17,13 +17,17 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.xml.bind.DatatypeConverter;
 
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignerDigestMismatchException;
@@ -88,37 +92,6 @@ public class SMIMEVerifier
 		log.debug("DBG: inside " + getClass() + ".checkSMIME()");
 		
 		log.debug("DBG: alias is: " + alias);
-		if (log.isDebugEnabled()) {
-
-			try {
-				if(smime != null ) {
-					InputStream tmpInputStream1 =  smime.getBodyPart(0).getInputStream();
-					
-					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					IOUtils.copy(tmpInputStream1, outputStream);
-					InputStream tmpInputStream2 = new ByteArrayInputStream(outputStream.toByteArray());
-					
-					log.debug("*** DBG: payload is: " + IOUtils.toString(tmpInputStream2, "UTF-8"));
-					
-					
-					tmpInputStream1 =  smime.getBodyPart(1).getInputStream();
-					
-					outputStream = new ByteArrayOutputStream();
-					IOUtils.copy(tmpInputStream1, outputStream);
-					 tmpInputStream2 = new ByteArrayInputStream(outputStream.toByteArray());
-					
-					log.debug("*** DBG: signature is: " + IOUtils.toString(tmpInputStream2, "UTF-8"));
-				}
-				
-				
-			} catch (IOException e) {
-				log.error(e,e);
-			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
-				log.error(e,e);
-			}
-
-		}
 
 		
 		
@@ -126,14 +99,12 @@ public class SMIMEVerifier
 							
 			if (!verifySignature(smime, alias)) {
 				log.debug("MdnType is: AUTHENTIFICATION_FAILED");
-//				Temporary Fix to force PROCESSED
-				return MdnType.PROCESSED;
-//				return MdnType.AUTHENTIFICATION_FAILED;
+				return MdnType.AUTHENTIFICATION_FAILED;
 			}
 
 		} catch (CMSException e) {
 			log.debug("MdnType is: INTEGRITY_CHECK_FAILED");
-			return MdnType.INTEGRITY_CHECK_FAILED;					
+			return MdnType.INTEGRITY_CHECK_FAILED;	
 		
 		} catch (Exception e){
 			log.error(e,e);
@@ -142,6 +113,7 @@ public class SMIMEVerifier
 		} 
 		
 		/* Everything is fine */
+		log.debug("MdnType is: PROCESSED");
 		return MdnType.PROCESSED;
 
 	}
@@ -162,12 +134,16 @@ public class SMIMEVerifier
 
 			/* Get Certificate */
 			X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-
+			log.debug("DBG: local certificate information: ");
+			log.debug("DBG: Issuer: " + cert.getIssuerX500Principal().getName());
+			log.debug("DBG: Serial number: " + Long.toHexString(cert.getSerialNumber().longValue()));
+			log.debug("DBG: Digest Alg " + cert.getSigAlgOID());
+			
 			/* Set SMIME Parser */
 			SMIMESignedParser s = new SMIMESignedParser(smime);
+			
 			ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert);		
 			SignerInformationVerifier signVerifier = new SignerInformationVerifier(verifier, new BcDigestCalculatorProvider());
-			
 			SignerInformationStore signers = s.getSignerInfos();
 			Collection<SignerInformation> c = signers.getSigners();
 			Iterator<SignerInformation> it = c.iterator();
@@ -175,7 +151,9 @@ public class SMIMEVerifier
 			/* For each signer check the signature */
 			while (it.hasNext()) {
 				SignerInformation signer = it.next();
-				
+				log.debug("DBG: signer Issuer: " + signer.getSID().getIssuerAsString());
+				log.debug("DBG: signer Serial Number: " + Long.toHexString(signer.getSID().getSerialNumber().longValue()));
+				log.debug("DBG: signer Digest Alg " + signer.getDigestAlgOID());
 				/* If one of the signatures is not verified verification fails */
 				if (!signer.verify(signVerifier)) {
 					log.debug("DBG: signature is not verified");
@@ -204,6 +182,8 @@ public class SMIMEVerifier
 		return "SMIMEToPayload";
 	}
 	
+	
+
 	
 
 }
