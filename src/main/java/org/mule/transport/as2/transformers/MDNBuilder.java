@@ -83,7 +83,7 @@ public class MDNBuilder  {
 	 * Create a different MDN based on the incoming mule message
 	 * 
 	 * */
-	public MuleMessage createMDN(MuleMessage message, String partnerId) throws TransformerException {
+	public synchronized MuleMessage createMDN(MuleMessage message, String partnerId) throws TransformerException {
 		
 
 		/* Get the MdnType based on the content */

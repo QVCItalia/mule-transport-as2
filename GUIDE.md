@@ -79,14 +79,7 @@ The AS2 connector is based on HTTP connector and supports all its attributes tog
 		<td>yes</td>	
 		<td></td>
 		<td><p>Business Partner Identifier, it specifies the receiver of the message. The name the business partner is expecting in the AS2 Message for the header "AS2-to"</p>
-		</td>		
-	<tr>
-		<td>partnerId</td>
-		<td>string</td>
-		<td>yes</td>	
-		<td></td>
-		<td><p>Business Partner Identifier, it specifies the receiver of the message. The name the business partner is expecting in the AS2 Message for the header "AS2-to"</p></td>							
-	</tr>				
+		</td>					
 </table>
 
 This connector also accepts all the attributes from HTTP Connector

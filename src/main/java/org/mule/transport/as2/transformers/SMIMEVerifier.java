@@ -10,19 +10,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.xml.bind.DatatypeConverter;
 
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignerDigestMismatchException;
@@ -83,8 +88,13 @@ public class SMIMEVerifier
 	}
 	
 
-	public MdnType checkSMIME(MimeMultipart smime, String alias)  {
+	public synchronized MdnType checkSMIME(MimeMultipart smime, String alias)  {
 		log.debug("DBG: inside " + getClass() + ".checkSMIME()");
+		
+		log.debug("DBG: alias is: " + alias);
+
+		
+		
 		try {
 							
 			if (!verifySignature(smime, alias)) {
@@ -94,7 +104,7 @@ public class SMIMEVerifier
 
 		} catch (CMSException e) {
 			log.debug("MdnType is: INTEGRITY_CHECK_FAILED");
-			return MdnType.INTEGRITY_CHECK_FAILED;					
+			return MdnType.INTEGRITY_CHECK_FAILED;	
 		
 		} catch (Exception e){
 			log.error(e,e);
@@ -103,6 +113,7 @@ public class SMIMEVerifier
 		} 
 		
 		/* Everything is fine */
+		log.debug("MdnType is: PROCESSED");
 		return MdnType.PROCESSED;
 
 	}
@@ -117,18 +128,22 @@ public class SMIMEVerifier
 	 * @throws CMSSignerDigestMismatchException 
 	 * 
 	 * */
-	private boolean verifySignature(MimeMultipart smime, String alias) throws CMSException, TransformerException  {
+	private synchronized boolean verifySignature(MimeMultipart smime, String alias) throws CMSException, TransformerException  {
 						
 		try {
 
 			/* Get Certificate */
 			X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-
+			log.debug("DBG: local certificate information: ");
+			log.debug("DBG: Issuer: " + cert.getIssuerX500Principal().getName());
+			log.debug("DBG: Serial number: " + Long.toHexString(cert.getSerialNumber().longValue()));
+			log.debug("DBG: Digest Alg " + cert.getSigAlgOID());
+			
 			/* Set SMIME Parser */
 			SMIMESignedParser s = new SMIMESignedParser(smime);
+			
 			ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert);		
 			SignerInformationVerifier signVerifier = new SignerInformationVerifier(verifier, new BcDigestCalculatorProvider());
-			
 			SignerInformationStore signers = s.getSignerInfos();
 			Collection<SignerInformation> c = signers.getSigners();
 			Iterator<SignerInformation> it = c.iterator();
@@ -136,7 +151,9 @@ public class SMIMEVerifier
 			/* For each signer check the signature */
 			while (it.hasNext()) {
 				SignerInformation signer = it.next();
-				
+				log.debug("DBG: signer Issuer: " + signer.getSID().getIssuerAsString());
+				log.debug("DBG: signer Serial Number: " + Long.toHexString(signer.getSID().getSerialNumber().longValue()));
+				log.debug("DBG: signer Digest Alg " + signer.getDigestAlgOID());
 				/* If one of the signatures is not verified verification fails */
 				if (!signer.verify(signVerifier)) {
 					log.debug("DBG: signature is not verified");
@@ -165,6 +182,8 @@ public class SMIMEVerifier
 		return "SMIMEToPayload";
 	}
 	
+	
+
 	
 
 }

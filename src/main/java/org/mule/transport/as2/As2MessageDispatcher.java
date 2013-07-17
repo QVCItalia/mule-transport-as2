@@ -20,6 +20,7 @@ import javax.mail.internet.MimeMultipart;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.lang.RandomStringUtils;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
@@ -80,6 +81,8 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
         if (client == null)
         {
             client = as2Connector.doClientConnectLocal();
+            client.getParams().setParameter(HttpConnectionParams.SO_TIMEOUT, 60000);
+            client.getParams().setParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 60000);
         }
     }
 
@@ -141,6 +144,7 @@ public class As2MessageDispatcher extends HttpClientMessageDispatcher
 
             // TODO can we use the return code for better reporting?
 //            client.setConnectionTimeout(20000);
+
             client.executeMethod(getHostConfig(uri), httpMethod);
 
             return httpMethod;
